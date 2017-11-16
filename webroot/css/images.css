@@ -1,0 +1,43 @@
+.main-container {
+    text-align: justify;
+    -ms-text-justify: distribute-all-lines;
+    text-justify: distribute-all-lines;
+    width:100%;
+}
+.main-container>div {
+    padding: 5px;
+    width: 24%;
+    height: 250px;
+    vertical-align: top;
+    display: inline-block;
+    *display: inline;
+    zoom: 1;
+}
+.main-container>div>img {
+    width: 200px;
+    height: 200px;
+    max-width: 300px;
+    max-height: 250px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+.main-container>div>p {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.search {
+    text-align: justify;
+    -ms-text-justify: distribute-all-lines;
+    text-justify: distribute-all-lines;
+    width:100%;
+}
+
+.search>div {
+    padding: 5px;
+    width: 49%;
+    vertical-align: top;
+    display: inline-block;
+
+}
