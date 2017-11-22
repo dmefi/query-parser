@@ -53,8 +53,9 @@ class ImagesController extends AppController
                         '_serialize' => ['json'],
                         'json' => json_encode($output),
                     ]);
-                } else
+                } else {
                     throw new Exception('Search query can not be empty');
+                }
 
             } catch (Exception $ex) {
                 $this->set([
@@ -64,7 +65,7 @@ class ImagesController extends AppController
             }
         } else {
             try {
-                $query = 'filename contains bubble gum AND (width < 200 OR height > 300)';
+                $query = 'width < 200 or (height > 100 and height < 300)';
                 if (!empty($query)) {
                     $query = strtolower($query);
                     $tokens = $this->stringToArray($query);
@@ -76,8 +77,9 @@ class ImagesController extends AppController
                     print_r($output);
                     echo '</pre>';
                     die();
-                } else
+                } else {
                     throw new Exception('Search query can not be empty');
+                }
 
             } catch (Exception $ex) {
                 echo $ex->getMessage();
@@ -178,11 +180,13 @@ class ImagesController extends AppController
 
         //validate bracket count
         if ($bracketLeft != 0 || $bracketRight != 0) {
-            if ($bracketLeft > $bracketRight)
+            if ($bracketLeft > $bracketRight) {
                 throw new Exception('Error in statement: ")" is missing');
+            }
 
-            if ($bracketLeft < $bracketRight)
+            if ($bracketLeft < $bracketRight) {
                 throw new Exception('Error in statement: "(" is missing');
+            }
 
         }
 
@@ -209,16 +213,19 @@ class ImagesController extends AppController
         for ($i = 0; $i < count($tokens); $i++) {
             if (in_array($tokens[$i], array('and', 'or'))) {
                 //Check for join operators in the beginning and end of query
-                if (!isset($tokens[$i - 1]))
+                if (!isset($tokens[$i - 1])) {
                     throw new Exception('Error in statement: Unexpected ' . strtoupper($tokens[$i]) . ' on the left of  "' . $tokens[$i + 1] . '"');
-                if (!isset($tokens[$i + 1]))
+                }
+                if (!isset($tokens[$i + 1])) {
                     throw new Exception('Error in statement: Unexpected ' . strtoupper($tokens[$i]) . ' on the right of "' . $tokens[$i - 1] . '"');
+                }
 
                 continue;
             }
 
-            if ($tokens[$i] == '(' || $tokens[$i] == ')')
+            if ($tokens[$i] == '(' || $tokens[$i] == ')') {
                 continue;
+            }
 
             //validation for operator
             $operator = '';
@@ -239,15 +246,18 @@ class ImagesController extends AppController
             }
 
             if ($operator != '') {
-                if ($count > 1)
+                if ($count > 1) {
                     throw new Exception('Error in statement: AND/OR condition missing');
+                }
 
                 $arrg = explode($operator, $tokens[$i]);
-                if ($operator == 'contains' && !$this->Images->hasField(trim($arrg[0])))
+                if ($operator == 'contains' && !$this->Images->hasField(trim($arrg[0]))) {
                     throw new Exception('Error in statement: Unknown field for operator ' . $operator);
+                }
 
-                if (!$this->Images->hasField(trim($arrg[0])) && !$this->Images->hasField(trim($arrg[1])))
+                if (!$this->Images->hasField(trim($arrg[0])) && !$this->Images->hasField(trim($arrg[1]))) {
                     throw new Exception('Error in statement: Unknown field ' . $arrg[0]);
+                }
 
                 //swap fieldname and value if inverted
                 if ($this->Images->hasField(trim($arrg[0]))) {
@@ -256,19 +266,25 @@ class ImagesController extends AppController
                 } else {
                     $field = trim($arrg[1]);
                     $value = trim($arrg[0]);
-                    if (array_key_exists($operator, $matchingArray))
+                    if (array_key_exists($operator, $matchingArray)) {
                         $operator = $matchingArray[$operator];
+                    }
                 }
 
                 if (array_key_exists($field, $allowedOperators)) {
                     if ($field == 'filename') {
-                        if (!in_array(ord($operator), $allowedOperators[$field]) && !in_array($operator, $allowedOperators[$field]))
+                        if (!in_array(ord($operator), $allowedOperators[$field]) && !in_array($operator,
+                                $allowedOperators[$field])
+                        ) {
                             throw new Exception('Error in statement: Wrong operator ' . $operator . ' for field ' . $field);
-                        if (array_key_exists($operator, $matchingArray))
+                        }
+                        if (array_key_exists($operator, $matchingArray)) {
                             $operator = $matchingArray[$operator];
+                        }
                     } else {
-                        if (!in_array(ord($operator), $allowedOperators[$field]))
+                        if (!in_array(ord($operator), $allowedOperators[$field])) {
                             throw new Exception('Error in statement: Wrong operator ' . $operator . ' for field ' . $field);
+                        }
                     }
 
                 }
@@ -300,8 +316,9 @@ class ImagesController extends AppController
         $row = '';
 
         for ($i = $start_index; $i < count($tokens); $i++) {
-            if ($this->bracketCount < 0)
+            if ($this->bracketCount < 0) {
                 return array($out, $i);
+            }
 
             if ($tokens[$i] == 'or') {
                 if ($token != '') {
@@ -351,6 +368,14 @@ class ImagesController extends AppController
                 return array($out, $i);
             }
         }
+        if ($token != '') {
+            if ($row == '') {
+                $out[$token['field'] . ' ' . $token['operator']] = $token['value'];
+            } else {
+                $out[$row][$token['field'] . ' ' . $token['operator']] = $token['value'];
+            }
+        }
+        return array($out, $i);
     }
 
     /**
