@@ -65,7 +65,7 @@ class ImagesController extends AppController
             }
         } else {
             try {
-                $query = 'width < 200 or (height > 100 and height < 300)';
+                $query = '(height > 100 or height < 100) and (width < 200 or filename contains top)';
                 if (!empty($query)) {
                     $query = strtolower($query);
                     $tokens = $this->stringToArray($query);
@@ -292,7 +292,7 @@ class ImagesController extends AppController
                 $tokens[$i] = array(
                     'field' => $field,
                     'operator' => $operator,
-                    'value' => $operator == 'LIKE' ? '%' . $value . '%' : $value
+                    'value' => $operator == 'LIKE' ? '"%' . $value . '%"' : $value
                 );
             } else {
                 throw new Exception('Error in statement: Unknown operator in ' . $tokens[$i]);
